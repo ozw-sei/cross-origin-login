@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="frame-src http://account.foobar.com;">
+
+    <title>Service 1</title>
+</head>
+
+<body>
+    <h1>Welcome to Service 1</h1>
+    <form id="loginForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" required />
+        <label for="password">Password:</label>
+        <input type="password" id="password" required />
+        <button type="button" onclick="doLogin()">Login via account.foobar.com</button> <!-- type="button"に変更 -->
+    </form>
+
+    <div id="status">Not logged in</div>
+
+
+    <!-- account.foobar.comのログイン画面をiframeで埋め込む -->
+    <iframe id="accountFrame" src="http://account.foobar.com" style="display:none;" width="0" height="0"></iframe>
+
+    <script>
+        window.addEventListener('message', function (event) {
+            if (event.origin !== 'http://account.foobar.com') return; // 信頼するオリジンからのみ受信
+
+            console.log(event.data)
+            document.getElementById('status').textContent = event.data;
+
+            if (event.data === 'loginSuccess') {
+                // ログイン成功の処理
+                alert('Login successful!');
+            }
+        }, false);
+
+        function doLogin() {
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            var frame = document.getElementById('accountFrame');
+            frame.contentWindow.postMessage(JSON.stringify({ email: email, password: password }), 'http://account.foobar.com');
+        }
+    </script>
+</body>
+
+</html>

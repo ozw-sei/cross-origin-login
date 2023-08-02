@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./account:/usr/share/nginx/account
+      - ./service1:/usr/share/nginx/service1
+    command: [ nginx-debug, '-g', 'daemon off;' ]

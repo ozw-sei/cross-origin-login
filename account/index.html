@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+</head>
+
+<body>
+    <h1>AuthService</h1>
+
+
+    <form id="loginForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" required />
+        <label for="password">Password:</label>
+        <input type="password" id="password" required />
+        <button type="submit">Login</button>
+    </form>
+
+    <script>
+        const API_KEY = "YOURS"
+        const PROJECT_ID = "YOURS"
+        // Firebase設定
+        var firebaseConfig = {
+            apiKey: API_KEY,
+            projectId: PROJECT_ID,
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        function login(email, password) {
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.error("Login error:", errorCode, errorMessage);
+                });
+        }
+
+        // ログイン状態をチェック
+        firebase.auth().onAuthStateChanged(function (user) {
+            var status = user ? 'Logged in as ' + user.email : 'Not logged in';
+            console.log("account", status)
+            // service1にログイン状態を通知
+            window.parent.postMessage(status, 'http://service1.foobar.com');
+        });
+
+
+        window.addEventListener('message', function (event) {
+            if (event.origin !== 'http://service1.foobar.com') return;
+
+            var credentials = JSON.parse(event.data);
+            login(credentials.email, credentials.password);
+        }, false);
+
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // 画面遷移を防ぐ
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            login(email, password);
+        });
+    </script>
+</body>
+
+</html>
